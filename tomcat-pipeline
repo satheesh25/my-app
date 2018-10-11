@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+        stages{
+            stage('source'){
+                steps{
+                git 'https://github.com/satheesh25/myweb.git'
+            }
+            }
+            stage('compile stage'){
+                steps{
+                withMaven(maven: 'maven'){
+                sh 'mvn clean compile'
+            }
+                   }
+        }
+        stage('test stage'){
+                steps{
+                withMaven(maven: 'maven'){
+                sh 'mvn clean test'
+            }
+                   }
+        }
+        stage('pacage stage'){
+                steps{
+                withMaven(maven: 'maven'){
+                sh 'mvn clean package'
+            }
+                   }
+        }
+        stage('Deploy to Tomcat'){
+      steps{
+      sshagent(['pipeline-tomcat']) {
+         sh 'scp -o StrictHostKeyChecking=no target/*.war ec2-user@54.89.102.163:/PIPELINE/apache-tomcat-7.0.91/webapps'
+      }
+   }
+    }
+}
+}
